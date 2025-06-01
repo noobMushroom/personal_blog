@@ -27,7 +27,7 @@ async fn handle_connction(stream: &mut TcpStream) -> Result<(), HttpError> {
     stream.read(&mut buffer).await?;
     let request = String::from_utf8_lossy(&buffer[..]);
     let header = get_route(&request)?;
-    handle_route(&header, stream).await;
+    handle_route(&header, stream).await?;
     stream.flush().await?;
     stream.shutdown(Shutdown::Write)?;
     Ok(())

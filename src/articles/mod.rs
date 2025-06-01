@@ -1,1 +1,1 @@
-mod artciles;
+pub mod articles;

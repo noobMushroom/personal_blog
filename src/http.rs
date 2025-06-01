@@ -21,11 +21,12 @@ pub fn get_response(html: &str) -> String {
         "HTTP/1.1 200 OK\r\n\
          Content-Type: text/html\r\n\
          Access-Control-Allow-Origin: *\r\n\
-          connection: Closed\r\n\
-         Content-Length: \r\n\
+         connection: Closed\r\n\
+         Content-Length: {} \r\n\
          \r\n\
 {}
          ",
+        html.len(),
         html
     )
 }
