@@ -1,12 +1,12 @@
 use crate::articles;
 use crate::articles::articles::ArticleMeta;
-use crate::error::HttpError;
+use crate::error::AppError;
 use crate::html::{get_html, get_html_template};
 use crate::http::get_response;
 use async_std::io::WriteExt;
 use async_std::net::TcpStream;
 
-pub async fn home(stream: &mut TcpStream) -> Result<(), HttpError> {
+pub async fn home(stream: &mut TcpStream) -> Result<(), AppError> {
     let html_template = get_html_template("index.html").await?;
     let articles_meta = articles::articles::ArticleIndex::read_articles(
         async_std::path::Path::new("Articles/index.json"),
