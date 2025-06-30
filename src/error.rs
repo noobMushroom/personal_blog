@@ -22,6 +22,12 @@ pub enum AppError {
 
     #[error("Http error: {0}")]
     Http(#[from] HttpError),
+
+    #[error("Cookie error: {0}")]
+    Cookie(#[from] CookiesErrors),
+
+    #[error("Session Error: {0}")]
+    Session(#[from] SessionErrors),
 }
 
 #[derive(Error, Debug)]
@@ -43,6 +49,18 @@ pub enum MutexErrors {
 pub enum UserError {
     #[error("Invalid Credentials")]
     InvalidCredentials,
+}
+
+#[derive(Error, Debug)]
+pub enum CookiesErrors {
+    #[error("Missing session cookies")]
+    MissingSessionCookies,
+}
+
+#[derive(Error, Debug)]
+pub enum SessionErrors {
+    #[error("Invalid session")]
+    InvalidSession,
 }
 
 impl<T> From<std::sync::PoisonError<T>> for MutexErrors {

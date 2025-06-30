@@ -55,7 +55,6 @@ async fn handle_connection(stream: &mut TcpStream, state: &AppState) -> Result<(
     let mut buffer = [0; 1024];
     let n = stream.read(&mut buffer).await?;
     let request = String::from_utf8_lossy(&buffer[..n]);
-    println!("{}", request);
     let http_request = HttpRequest::new(&request)?;
     handle_route(&http_request, stream, state).await?;
     stream.flush().await?;

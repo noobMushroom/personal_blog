@@ -1,4 +1,4 @@
-use crate::error::HttpError;
+use crate::error::{CookiesErrors, HttpError};
 
 pub enum Methods {
     Get,
@@ -18,6 +18,7 @@ pub enum Routes {
 pub struct Header {
     pub method: Methods,
     pub route: Routes,
+    pub session_cookie: Option<String>,
 }
 
 fn parse_route(route: &str) -> Routes {
@@ -32,6 +33,22 @@ fn parse_route(route: &str) -> Routes {
             unimplemented!()
         }
     }
+}
+
+pub fn parse_cookie(req: &str) -> Option<String> {
+    req.lines()
+        .find(|line| line.starts_with("Cookie:"))
+        .and_then(|value| {
+            value.strip_prefix("Cookie: ").and_then(|cookie| {
+                cookie.split("; ").find_map(|part| {
+                    let mut parts = part.splitn(2, '=');
+                    match (parts.next(), parts.next()) {
+                        (Some("session_id"), Some(val)) => Some(val.to_string()),
+                        _ => None,
+                    }
+                })
+            })
+        })
 }
 
 fn parse_method(method: &str) -> Methods {
@@ -55,12 +72,24 @@ impl Header {
                 .ok_or_else(|| HttpError::UnexpectedRequest("Missing Method".into()))?,
         );
 
+        let cookie = parse_cookie(req);
+
         let route = parse_route(
             parts
                 .next()
                 .ok_or_else(|| HttpError::UnexpectedRequest("Missing Route".into()))?,
         );
 
-        Ok(Self { method, route })
+        Ok(Self {
+            method,
+            route,
+            session_cookie: cookie,
+        })
+    }
+
+    pub fn get_session_cookie(&self) -> Result<&str, CookiesErrors> {
+        self.session_cookie
+            .as_deref()
+            .ok_or_else(|| CookiesErrors::MissingSessionCookies)
     }
 }

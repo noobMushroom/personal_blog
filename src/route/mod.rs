@@ -20,8 +20,8 @@ pub async fn handle_route(
     state: &AppState,
 ) -> Result<(), AppError> {
     match &http_req.header.method {
-        Methods::Post => handle_post(http_req, stream, state).await,
-        Methods::Get => handle_get(&http_req.header.route, stream, state).await,
+        Methods::Post => handle_post(&http_req, stream, state).await,
+        Methods::Get => handle_get(&http_req, stream, state).await,
         _ => Err(HttpError::UnexpectedRoute("Wrong route".into()))?,
     }
 }
@@ -42,15 +42,15 @@ async fn handle_post(
 }
 
 async fn handle_get(
-    route: &Routes,
+    req: &HttpRequest,
     stream: &mut TcpStream,
     state: &AppState,
 ) -> Result<(), AppError> {
-    match route {
+    match req.header.route {
         Routes::Home => home(stream).await,
         Routes::Login => login(stream).await,
         Routes::Favicon => favicon(stream).await,
-        Routes::Dashboard => dashboard(stream, state).await,
+        Routes::Dashboard => dashboard(stream, state, req).await,
         _ => Err(HttpError::UnexpectedRoute("Routes error".into()))?,
     }
 }
