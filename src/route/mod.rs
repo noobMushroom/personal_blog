@@ -1,12 +1,10 @@
 use crate::error::{AppError, HttpError};
 use crate::request::{HttpRequest, Methods, Routes};
-use crate::route::dashboard::dashboard;
 use crate::route::favicon::favicon;
 use crate::route::home::home;
 use crate::route::login::{login, login_with_body};
 use crate::session::AppState;
 use crate::users;
-use async_std::io::WriteExt;
 use async_std::net::TcpStream;
 
 mod dashboard;
@@ -47,10 +45,9 @@ async fn handle_get(
     state: &AppState,
 ) -> Result<(), AppError> {
     match req.header.route {
-        Routes::Home => home(stream).await,
+        Routes::Home => home(stream, state, req).await,
         Routes::Login => login(stream).await,
         Routes::Favicon => favicon(stream).await,
-        Routes::Dashboard => dashboard(stream, state, req).await,
         _ => Err(HttpError::UnexpectedRoute("Routes error".into()))?,
     }
 }

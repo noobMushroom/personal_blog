@@ -7,7 +7,7 @@ use async_std::net::TcpStream;
 
 pub async fn login(stream: &mut TcpStream) -> Result<(), AppError> {
     let html_template = get_html_template("login.html").await?;
-    let mut response = get_response(&html_template);
+    let response = get_response(&html_template);
     stream.write_all(response.as_bytes()).await?;
     Ok(())
 }

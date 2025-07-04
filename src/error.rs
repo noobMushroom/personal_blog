@@ -28,6 +28,9 @@ pub enum AppError {
 
     #[error("Session Error: {0}")]
     Session(#[from] SessionErrors),
+
+    #[error("Html Parse error: {0}")]
+    TeraError(#[from] tera::Error),
 }
 
 #[derive(Error, Debug)]

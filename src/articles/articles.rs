@@ -1,9 +1,9 @@
 use crate::error::AppError;
 use async_std::fs;
 use async_std::path::Path;
-use serde::Deserialize;
+use serde::{Deserialize, Serialize};
 
-#[derive(Deserialize)]
+#[derive(Deserialize, Serialize, Debug)]
 pub struct ArticleMeta {
     pub title: String,
     pub uuid: String,

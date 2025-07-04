@@ -1,13 +1,14 @@
+mod authed;
 mod body;
 mod header;
 
 pub use header::*;
 
-use crate::error::{AppError, HttpError};
+use crate::error::{AppError, HttpError, SessionErrors};
 use crate::request::body::parse_body;
 pub(crate) use crate::request::header::Header;
 use crate::route::handle_route;
-use crate::session::AppState;
+use crate::session::{AppState, Session};
 use async_std::io::{ReadExt, WriteExt};
 use async_std::net::TcpStream;
 use async_std::prelude::StreamExt;
@@ -32,10 +33,33 @@ impl HttpRequest {
             .as_deref()
             .ok_or_else(|| HttpError::UnexpectedRequest("body not found".into()))
     }
+
+    pub fn require_session(&self, state: &AppState) -> Result<Session, AppError> {
+        let id = self
+            .header
+            .session_cookie
+            .as_ref()
+            .ok_or(SessionErrors::InvalidSession)?;
+
+        state
+            .get_session(id)?
+            .ok_or(SessionErrors::InvalidSession.into())
+    }
+
+    pub fn optional_session(&self, state: &AppState) -> Result<Option<Session>, AppError> {
+        if let Some(id) = self.header.get_session_cookie() {
+            match state.get_session(id)? {
+                Some(session) => Ok(Some(session)),
+                None => Ok(None),
+            }
+        } else {
+            Ok(None)
+        }
+    }
 }
 
-pub async fn run() -> std::io::Result<()> {
-    let app_state = AppState::new();
+pub async fn run() -> Result<(), AppError> {
+    let app_state = AppState::new()?;
     let listener = net::TcpListener::bind("[::]:8080").await?;
     let mut incoming = listener.incoming();
 

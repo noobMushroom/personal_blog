@@ -10,7 +10,7 @@ enum Codes {
 pub fn get_successful_login(session_id: &str) -> String {
     format!(
         "HTTP/1.1 302 Found\r\n\
-         Location: /dashboard\r\n\
+         Location: /\r\n\
          Set-Cookie: session_id={}; Path=/; HttpOnly; SameSite=Strict\r\n\
          Content-Length: 0\r\n\
          \r\n",

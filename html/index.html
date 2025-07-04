@@ -7,8 +7,18 @@
 <body>
 <h1>This is the personal blogs</h1>
 <ul>
-    {{articles}}
+    {% for article in articles %}
+    {% if is_admin %}
+    <a href="{{ article.uuid }}">{{ article.title}}</a>
+    {% else %}
+    <a href="{{ article.uuid }}">{{ article.title}} {{ article.date }}</a>
+    {% endif %}
+    {% endfor %}
 </ul>
+{% if is_admin %}
+<a href="/logout">Logout</a>
+{% else %}
 <a href="/login">Login</a>
+{% endif %}
 </body>
 </html>

@@ -1,4 +1,4 @@
-use crate::error::{CookiesErrors, HttpError};
+use crate::error::HttpError;
 
 pub enum Methods {
     Get,
@@ -87,9 +87,7 @@ impl Header {
         })
     }
 
-    pub fn get_session_cookie(&self) -> Result<&str, CookiesErrors> {
-        self.session_cookie
-            .as_deref()
-            .ok_or_else(|| CookiesErrors::MissingSessionCookies)
+    pub fn get_session_cookie(&self) -> Option<&str> {
+        self.session_cookie.as_deref()
     }
 }
