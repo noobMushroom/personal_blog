@@ -1,10 +1,11 @@
-use crate::articles;
+use crate::articles::articles::ArticleIndex;
 use crate::error::AppError;
 use crate::http::get_response;
 use crate::request::HttpRequest;
-use crate::session::AppState;
+use crate::session::{AppState, Session};
 use async_std::io::WriteExt;
 use async_std::net::TcpStream;
+use tera::Context;
 
 pub async fn home(
     stream: &mut TcpStream,
@@ -12,23 +13,38 @@ pub async fn home(
     req: &HttpRequest,
 ) -> Result<(), AppError> {
     let session = req.optional_session(state)?;
-    let mut context = tera::Context::new();
-    let articles_meta = articles::articles::ArticleIndex::read_articles(
-        async_std::path::Path::new("Articles/index.json"),
-    )
-    .await?;
+    let articles_meta =
+        ArticleIndex::read_articles(async_std::path::Path::new("Articles/index.json")).await?;
+    let render;
     match session {
         Some(session) => {
-            context.insert("articles", &articles_meta.articles);
-            context.insert("is_admin", &true);
+            render = state.tempelates.render(
+                "index.html",
+                &generate_session_context(&articles_meta, &session),
+            )?;
         }
         None => {
-            context.insert("articles", &articles_meta.articles);
-            context.insert("is_admin", &false);
+            render = state
+                .tempelates
+                .render("index.html", &generate_guest_context(&articles_meta))?;
         }
     }
-    let render = state.tempelates.render("index.html", &context)?;
     let response = get_response(&render);
     stream.write_all(response.as_bytes()).await?;
     Ok(())
+}
+
+fn generate_session_context(articles_meta: &ArticleIndex, session: &Session) -> Context {
+    let mut context = tera::Context::new();
+    context.insert("articles", &articles_meta.articles);
+    context.insert("is_admin", &true);
+    context.insert("username", &session.username);
+    context
+}
+
+fn generate_guest_context(articles_meta: &ArticleIndex) -> Context {
+    let mut context = tera::Context::new();
+    context.insert("articles", &articles_meta.articles);
+    context.insert("is_admin", &false);
+    context
 }

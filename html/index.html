@@ -5,13 +5,24 @@
     <title>Personal Blogs</title>
 </head>
 <body>
-<h1>This is the personal blogs</h1>
+{% if is_admin %}
+<h1>Welcome {{ username }}</h1>
+<a href="/new">Add Article</a>
+{% else %}
+<h1>Welcome to personal blogs</h1>
+{% endif %}
 <ul>
     {% for article in articles %}
     {% if is_admin %}
-    <a href="{{ article.uuid }}">{{ article.title}}</a>
+    <li>
+        <a href="{{ article.uuid }}">{{ article.title}}</a>
+        <a href="/edit">Edit</a>
+        <a href="/delete">Delete</a>
+    </li>
     {% else %}
-    <a href="{{ article.uuid }}">{{ article.title}} {{ article.date }}</a>
+    <li>
+        <a href="{{ article.uuid }}">{{ article.title}} {{ article.date }}</a>
+    </li>
     {% endif %}
     {% endfor %}
 </ul>

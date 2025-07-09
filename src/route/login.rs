@@ -1,13 +1,13 @@
 use crate::error::AppError;
-use crate::html::get_html_template;
 use crate::http::{get_failed_login_with_body, get_response, get_successful_login};
-use crate::session::Session;
+use crate::session::{AppState, Session};
 use async_std::io::WriteExt;
 use async_std::net::TcpStream;
 
-pub async fn login(stream: &mut TcpStream) -> Result<(), AppError> {
-    let html_template = get_html_template("login.html").await?;
-    let response = get_response(&html_template);
+pub async fn login(stream: &mut TcpStream, state: &AppState) -> Result<(), AppError> {
+    let context = tera::Context::new();
+    let render = state.tempelates.render("login.html", &context)?;
+    let response = get_response(&render);
     stream.write_all(response.as_bytes()).await?;
     Ok(())
 }

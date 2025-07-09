@@ -17,6 +17,13 @@ pub fn get_successful_login(session_id: &str) -> String {
         session_id
     )
 }
+
+pub fn get_successful_article_add<'a>() -> &'a str {
+    "HTTP/1.1 302 Found\r\n\
+         Location: /\r\n\
+         Content-Length: 0\r\n\
+         \r\n"
+}
 pub async fn get_failed_login_with_body() -> Result<String, AppError> {
     let html = get_html_template("failed_login.html").await?;
     Ok(format!(

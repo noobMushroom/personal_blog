@@ -12,6 +12,7 @@ pub enum Routes {
     Favicon,
     Dashboard,
     Authenticate,
+    New,
     Article(String),
     Unknown(String),
 }
@@ -28,6 +29,7 @@ fn parse_route(route: &str) -> Routes {
         "/favicon.ico" => Routes::Favicon,
         "/dashboard" => Routes::Dashboard,
         "/authenticate" => Routes::Authenticate,
+        "/new" => Routes::New,
         some => {
             println!("route parse: {}", some);
             unimplemented!()

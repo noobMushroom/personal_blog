@@ -1,4 +1,4 @@
-mod authed;
+pub mod authed;
 mod body;
 mod header;
 
