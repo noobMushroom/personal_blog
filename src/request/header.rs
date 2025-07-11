@@ -14,6 +14,8 @@ pub enum Routes {
     Authenticate,
     New,
     Article(String),
+    Delete(String),
+    Update(String),
     Unknown(String),
 }
 pub struct Header {
@@ -30,10 +32,20 @@ fn parse_route(route: &str) -> Routes {
         "/dashboard" => Routes::Dashboard,
         "/authenticate" => Routes::Authenticate,
         "/new" => Routes::New,
-        some => {
-            println!("route parse: {}", some);
-            unimplemented!()
-        }
+        some => parse_subdomain(some),
+    }
+}
+
+fn parse_subdomain(link: &str) -> Routes {
+    let link = link
+        .trim_start_matches("/")
+        .split('/')
+        .collect::<Vec<&str>>();
+    match link {
+        ["/article", uuid] => Routes::Article(uuid.to_string()),
+        ["/delete", uuid] => Routes::Delete(uuid.to_string()),
+        ["/update", uuid] => Routes::Update(uuid.to_string()),
+        unknown => Routes::Unknown(unknown.to_string()),
     }
 }
 

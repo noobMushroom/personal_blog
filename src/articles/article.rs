@@ -2,6 +2,7 @@ use crate::error::{AppError, HttpError};
 use crate::utils::extract_from_string;
 use async_std::path::Path;
 use serde::{Deserialize, Serialize};
+use std::fs;
 use std::fs::File;
 use std::io::BufWriter;
 use uuid::Uuid;
@@ -38,4 +39,13 @@ impl Article {
         serde_json::to_writer_pretty(writer, &self)?;
         Ok(())
     }
+}
+
+pub fn get_article(uuid: &str) -> Result<Article, AppError> {
+    let path = Path::new("Articles")
+        .join("articles")
+        .join(format!("{uuid}.json"));
+    let article = fs::read_to_string(&path)?;
+    let article_json: Article = serde_json::from_str(&article)?;
+    Ok(article_json)
 }

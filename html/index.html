@@ -13,17 +13,13 @@
 {% endif %}
 <ul>
     {% for article in articles %}
-    {% if is_admin %}
     <li>
-        <a href="{{ article.uuid }}">{{ article.title}}</a>
+        <a href="/article/{{ article.uuid }}">{{ article.title}} {{ article.date }}</a>
+        {% if is_admin %}
         <a href="/edit">Edit</a>
         <a href="/delete">Delete</a>
+        {% endif %}
     </li>
-    {% else %}
-    <li>
-        <a href="{{ article.uuid }}">{{ article.title}} {{ article.date }}</a>
-    </li>
-    {% endif %}
     {% endfor %}
 </ul>
 {% if is_admin %}

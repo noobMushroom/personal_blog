@@ -15,30 +15,23 @@ pub async fn home(
     let session = req.optional_session(state)?;
     let articles_meta =
         ArticleIndex::read_articles(async_std::path::Path::new("Articles/index.json")).await?;
-    let render;
-    match session {
-        Some(session) => {
-            render = state.tempelates.render(
-                "index.html",
-                &generate_session_context(&articles_meta, &session),
-            )?;
-        }
-        None => {
-            render = state
-                .tempelates
-                .render("index.html", &generate_guest_context(&articles_meta))?;
-        }
-    }
+    let context = generate_context(&articles_meta, &session);
+    let render = state.tempelates.render("index.html", &context)?;
     let response = get_response(&render);
     stream.write_all(response.as_bytes()).await?;
     Ok(())
 }
 
-fn generate_session_context(articles_meta: &ArticleIndex, session: &Session) -> Context {
+fn generate_context(articles_meta: &ArticleIndex, session: &Option<Session>) -> Context {
     let mut context = tera::Context::new();
+    match session {
+        Some(session) => {
+            context.insert("is_admin", &true);
+            context.insert("username", &session.username);
+        }
+        None => context.insert("is_admin", &false),
+    }
     context.insert("articles", &articles_meta.articles);
-    context.insert("is_admin", &true);
-    context.insert("username", &session.username);
     context
 }
 
