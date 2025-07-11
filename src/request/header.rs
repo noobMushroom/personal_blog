@@ -13,10 +13,17 @@ pub enum Routes {
     Dashboard,
     Authenticate,
     New,
-    Article(String),
+    Article(ArticleRoutes),
     Delete(String),
     Update(String),
     Unknown(String),
+}
+
+pub enum ArticleRoutes {
+    Article(String),
+    Delete(String),
+    Update(String),
+    New,
 }
 pub struct Header {
     pub method: Methods,
@@ -31,7 +38,6 @@ fn parse_route(route: &str) -> Routes {
         "/favicon.ico" => Routes::Favicon,
         "/dashboard" => Routes::Dashboard,
         "/authenticate" => Routes::Authenticate,
-        "/new" => Routes::New,
         article if article.starts_with("/article") => parse_article_subdomain(article),
         unknown => Routes::Unknown(unknown.to_string()),
     }
@@ -43,10 +49,10 @@ fn parse_article_subdomain(path: &str) -> Routes {
         .split('/')
         .collect::<Vec<&str>>();
     match link.as_slice() {
-        ["article", uuid] => Routes::Article(uuid.to_string()),
-        ["article", "new"] => Routes::New,
-        ["article", "delete", uuid] => Routes::Delete(uuid.to_string()),
-        ["article", "update", uuid] => Routes::Update(uuid.to_string()),
+        ["article", "new"] => Routes::Article(ArticleRoutes::New),
+        ["article", uuid] => Routes::Article(ArticleRoutes::Article(uuid.to_string())),
+        ["article", "delete", uuid] => Routes::Article(ArticleRoutes::Delete(uuid.to_string())),
+        ["article", "update", uuid] => Routes::Article(ArticleRoutes::Update(uuid.to_string())),
         _ => Routes::Unknown(path.to_string()),
     }
 }
@@ -108,10 +114,13 @@ impl Header {
     }
 
     pub fn get_route_uuid(&self) -> &str {
-        match self.route {
-            Routes::Update(ref uuid) => uuid,
-            Routes::Article(ref uuid) => uuid,
-            Routes::Delete(ref uuid) => uuid,
+        match &self.route {
+            Routes::Article(article) => match article {
+                ArticleRoutes::Update(ref uuid) => uuid,
+                ArticleRoutes::Article(ref uuid) => uuid,
+                ArticleRoutes::Delete(ref uuid) => uuid,
+                _ => "",
+            },
             _ => "",
         }
     }

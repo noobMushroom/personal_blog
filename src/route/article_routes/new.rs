@@ -29,7 +29,7 @@ pub async fn add_article(
     let path = Path::new("Articles").join("index.json");
     let mut article_index = ArticleIndex::read_articles(&path).await?;
     let article = Article::new(authed.req.get_body()?, authed.session.user_id.clone())?;
-    article.add()?;
+    article.save()?;
     let article_meta = ArticleMeta::new(article.title, article.uuid, article.date);
     article_index.add_articles(article_meta, &path).await?;
     let response = get_successful_article_add();

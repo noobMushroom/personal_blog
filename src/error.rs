@@ -31,6 +31,9 @@ pub enum AppError {
 
     #[error("Html Parse error: {0}")]
     TeraError(#[from] tera::Error),
+
+    #[error("Custom Error: {0}")]
+    Custom(String),
 }
 
 #[derive(Error, Debug)]
@@ -40,6 +43,9 @@ pub enum HttpError {
 
     #[error("Unexpected Request {0}")]
     UnexpectedRequest(String),
+
+    #[error("Page Not found")]
+    PageNotFound,
 }
 
 #[derive(Error, Debug)]

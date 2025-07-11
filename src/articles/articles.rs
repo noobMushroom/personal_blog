@@ -54,4 +54,22 @@ impl ArticleIndex {
         self.save_articles(path).await?;
         Ok(())
     }
+
+    pub async fn update_articles(
+        &mut self,
+        uuid: &str,
+        title: &str,
+        path: &Path,
+    ) -> Result<(), AppError> {
+        match self.articles.iter_mut().find(|meta| meta.uuid == uuid) {
+            Some(article) => {
+                article.title = title.to_string();
+                self.save_articles(path).await?;
+            }
+            None => {
+                return Err(AppError::Custom("Article not found".to_string()));
+            }
+        };
+        Ok(())
+    }
 }

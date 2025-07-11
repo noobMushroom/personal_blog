@@ -2,7 +2,6 @@ use crate::error::{AppError, HttpError};
 use crate::utils::extract_from_string;
 use async_std::path::Path;
 use serde::{Deserialize, Serialize};
-use std::fs;
 use std::fs::File;
 use std::io::BufWriter;
 use uuid::Uuid;
@@ -31,12 +30,19 @@ impl Article {
         })
     }
 
-    pub fn add(&self) -> Result<(), AppError> {
+    pub fn save(&self) -> Result<(), AppError> {
         let path = Path::new("Articles")
             .join("articles")
             .join(format!("{}.json", self.uuid));
         let writer = BufWriter::new(File::create(path)?);
         serde_json::to_writer_pretty(writer, &self)?;
+        Ok(())
+    }
+
+    pub fn update(&mut self, title: &str, content: &str) -> Result<(), AppError> {
+        self.content = content.to_owned();
+        self.title = title.to_owned();
+        self.save()?;
         Ok(())
     }
 }
@@ -45,7 +51,8 @@ pub fn get_article(uuid: &str) -> Result<Article, AppError> {
     let path = Path::new("Articles")
         .join("articles")
         .join(format!("{uuid}.json"));
-    let article = fs::read_to_string(&path)?;
-    let article_json: Article = serde_json::from_str(&article)?;
+    let file = File::open(path).map_err(|_| AppError::Http(HttpError::PageNotFound))?;
+    let reader = std::io::BufReader::new(file);
+    let article_json: Article = serde_json::from_reader(reader)?;
     Ok(article_json)
 }

@@ -1,7 +1,8 @@
 use crate::error::{AppError, HttpError};
 use crate::http::redirect_to_login;
 use crate::request::authed::AuthedRequest;
-use crate::request::{HttpRequest, Methods, Routes};
+use crate::request::{ArticleRoutes, HttpRequest, Methods, Routes};
+use crate::route::article_routes::update_article::update_article;
 use crate::route::favicon::favicon;
 use crate::route::home::home;
 use crate::route::login::{login, login_with_body};
@@ -44,7 +45,11 @@ async fn handle_post(
             login_with_body(stream, session).await?;
             Ok(())
         }
-        Routes::New => with_auth(req, state, stream, add_article).await,
+        Routes::Article(article) => match article {
+            ArticleRoutes::New => with_auth(req, state, stream, add_article).await,
+            ArticleRoutes::Update(_) => with_auth(req, state, stream, update_article).await,
+            _ => Err(HttpError::UnexpectedRoute("Routes error".into()))?,
+        },
         Routes::Unknown(_) => page_not_found(req, state, stream).await,
         _ => Err(HttpError::UnexpectedRoute("Routes error".into()))?,
     }
@@ -59,9 +64,12 @@ async fn handle_get(
         Routes::Home => home(stream, state, req).await,
         Routes::Login => login(stream, state).await,
         Routes::Favicon => favicon(stream).await,
-        Routes::New => with_auth(req, state, stream, get_article_html).await,
-        Routes::Article(_) => article(req, state, stream).await,
-        Routes::Update(_) => with_auth(req, state, stream, get_update_form).await,
+        Routes::Article(article_routes) => match article_routes {
+            ArticleRoutes::New => with_auth(req, state, stream, get_article_html).await,
+            ArticleRoutes::Update(_) => with_auth(req, state, stream, get_update_form).await,
+            ArticleRoutes::Article(_) => article(req, state, stream).await,
+            _ => Err(HttpError::UnexpectedRoute("Routes error".into()))?,
+        },
         Routes::Unknown(_) => page_not_found(req, state, stream).await,
         _ => Err(HttpError::UnexpectedRoute("Routes error".into()))?,
     }

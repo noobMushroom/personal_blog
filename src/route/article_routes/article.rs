@@ -1,7 +1,8 @@
-use crate::articles::article::{get_article, Article};
+use crate::articles::article::Article;
 use crate::error::AppError;
 use crate::http::get_response;
 use crate::request::HttpRequest;
+use crate::route::article_routes::get_article_or_404;
 use crate::session::{AppState, Session};
 use async_std::io::WriteExt;
 use async_std::net::TcpStream;
@@ -13,7 +14,7 @@ pub async fn article(
     stream: &mut TcpStream,
 ) -> Result<(), AppError> {
     let optional_session = req.optional_session(&state)?;
-    let article = get_article(req.header.get_route_uuid())?;
+    let article = get_article_or_404(&req.header.get_route_uuid(), state, stream).await?;
     let context = get_context(optional_session, &article);
     let render = state.tempelates.render("article.html", &context)?;
     let response = get_response(&render);
