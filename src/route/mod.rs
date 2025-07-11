@@ -2,23 +2,23 @@ use crate::error::{AppError, HttpError};
 use crate::http::redirect_to_login;
 use crate::request::authed::AuthedRequest;
 use crate::request::{HttpRequest, Methods, Routes};
-use crate::route::article::article;
 use crate::route::favicon::favicon;
 use crate::route::home::home;
 use crate::route::login::{login, login_with_body};
-use crate::route::new::{add_article, get_article_html};
 use crate::route::not_found::page_not_found;
 use crate::session::AppState;
 use crate::users;
+use article_routes::article::article;
+use article_routes::new::{add_article, get_article_html};
+use article_routes::update_article::get_update_form;
 use async_std::io::WriteExt;
 use async_std::net::TcpStream;
 
-mod article;
+mod article_routes;
 mod dashboard;
 mod favicon;
 mod home;
 mod login;
-mod new;
 mod not_found;
 
 pub async fn handle_route(
@@ -45,7 +45,7 @@ async fn handle_post(
             Ok(())
         }
         Routes::New => with_auth(req, state, stream, add_article).await,
-        Routes::Unknown(link) => page_not_found(req, state, stream, link).await,
+        Routes::Unknown(_) => page_not_found(req, state, stream).await,
         _ => Err(HttpError::UnexpectedRoute("Routes error".into()))?,
     }
 }
@@ -60,8 +60,9 @@ async fn handle_get(
         Routes::Login => login(stream, state).await,
         Routes::Favicon => favicon(stream).await,
         Routes::New => with_auth(req, state, stream, get_article_html).await,
-        Routes::Article(uuid) => article(req, state, stream, uuid).await,
-        Routes::Unknown(link) => page_not_found(req, state, stream, link).await,
+        Routes::Article(_) => article(req, state, stream).await,
+        Routes::Update(_) => with_auth(req, state, stream, get_update_form).await,
+        Routes::Unknown(_) => page_not_found(req, state, stream).await,
         _ => Err(HttpError::UnexpectedRoute("Routes error".into()))?,
     }
 }

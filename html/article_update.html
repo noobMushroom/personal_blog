@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>{{ title }}</title>
+</head>
+<body>
+<form action="/article/update/{{ uuid }}" method="post" target="_self">
+    <div>
+        <label>Title Name
+            <input id="title" name="title" placeholder="article title" type="text" value="{{ title }}">
+        </label>
+    </div>
+    <div>
+        <label>Content
+            <textarea cols="30" id="content" name="content" rows="10">{{ content }}</textarea>
+        </label>
+    </div>
+    <button type="submit">Add</button>
+</form>
+</body>
+</html>

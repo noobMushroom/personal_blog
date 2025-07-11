@@ -32,20 +32,22 @@ fn parse_route(route: &str) -> Routes {
         "/dashboard" => Routes::Dashboard,
         "/authenticate" => Routes::Authenticate,
         "/new" => Routes::New,
-        some => parse_subdomain(some),
+        article if article.starts_with("/article") => parse_article_subdomain(article),
+        unknown => Routes::Unknown(unknown.to_string()),
     }
 }
 
-fn parse_subdomain(link: &str) -> Routes {
-    let link = link
+fn parse_article_subdomain(path: &str) -> Routes {
+    let link = path
         .trim_start_matches("/")
         .split('/')
         .collect::<Vec<&str>>();
-    match link {
-        ["/article", uuid] => Routes::Article(uuid.to_string()),
-        ["/delete", uuid] => Routes::Delete(uuid.to_string()),
-        ["/update", uuid] => Routes::Update(uuid.to_string()),
-        unknown => Routes::Unknown(unknown.to_string()),
+    match link.as_slice() {
+        ["article", uuid] => Routes::Article(uuid.to_string()),
+        ["article", "new"] => Routes::New,
+        ["article", "delete", uuid] => Routes::Delete(uuid.to_string()),
+        ["article", "update", uuid] => Routes::Update(uuid.to_string()),
+        _ => Routes::Unknown(path.to_string()),
     }
 }
 
@@ -103,5 +105,14 @@ impl Header {
 
     pub fn get_session_cookie(&self) -> Option<&str> {
         self.session_cookie.as_deref()
+    }
+
+    pub fn get_route_uuid(&self) -> &str {
+        match self.route {
+            Routes::Update(ref uuid) => uuid,
+            Routes::Article(ref uuid) => uuid,
+            Routes::Delete(ref uuid) => uuid,
+            _ => "",
+        }
     }
 }

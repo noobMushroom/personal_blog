@@ -16,8 +16,8 @@
     <li>
         <a href="/article/{{ article.uuid }}">{{ article.title}} {{ article.date }}</a>
         {% if is_admin %}
-        <a href="/edit">Edit</a>
-        <a href="/delete">Delete</a>
+        <a href="/article/update/{{ article.uuid }}">Edit</a>
+        <a href="/article/delete/{{ article.uuid }}">Delete</a>
         {% endif %}
     </li>
     {% endfor %}

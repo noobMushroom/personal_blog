@@ -11,10 +11,9 @@ pub async fn article(
     req: &HttpRequest,
     state: &AppState,
     stream: &mut TcpStream,
-    uuid: &str,
 ) -> Result<(), AppError> {
     let optional_session = req.optional_session(&state)?;
-    let article = get_article(uuid)?;
+    let article = get_article(req.header.get_route_uuid())?;
     let context = get_context(optional_session, &article);
     let render = state.tempelates.render("article.html", &context)?;
     let response = get_response(&render);
