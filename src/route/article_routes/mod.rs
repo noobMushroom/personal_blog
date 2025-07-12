@@ -8,6 +8,7 @@ use tera::Context;
 
 pub mod article;
 pub mod new;
+pub mod remove;
 pub mod update_article;
 
 pub async fn get_article_or_404(

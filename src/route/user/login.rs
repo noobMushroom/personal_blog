@@ -14,6 +14,7 @@ pub async fn login(stream: &mut TcpStream, state: &AppState) -> Result<(), AppEr
 
 pub async fn login_with_body(
     stream: &mut TcpStream,
+    state: &AppState,
     session: Result<Session, AppError>,
 ) -> Result<(), AppError> {
     match session {
@@ -22,9 +23,11 @@ pub async fn login_with_body(
             stream.write_all(html.as_bytes()).await?;
         }
         Err(e) => {
-            let html = get_failed_login_with_body().await?;
+            let context = tera::Context::new();
+            let render = state.tempelates.render("failed_login.html", &context)?;
+            let response = get_failed_login_with_body(&render);
             eprintln!("error: {}", e);
-            stream.write_all(html.as_bytes()).await?;
+            stream.write_all(response.as_bytes()).await?;
         }
     }
     Ok(())

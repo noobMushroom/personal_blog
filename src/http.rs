@@ -1,11 +1,3 @@
-use crate::error::AppError;
-use crate::html::get_html_template;
-
-enum Codes {
-    Ok,
-    NotFound,
-}
-
 // Returns response for successful login
 pub fn get_successful_login(session_id: &str) -> String {
     format!(
@@ -38,9 +30,8 @@ pub fn get_successful_article_add<'a>() -> &'a str {
          Connection: closed\r\n\
          \r\n"
 }
-pub async fn get_failed_login_with_body() -> Result<String, AppError> {
-    let html = get_html_template("failed_login.html").await?;
-    Ok(format!(
+pub fn get_failed_login_with_body(html: &str) -> String {
+    format!(
         "HTTP/1.1 200 OK\r\n\
          Content-Type: text/html\r\n\
          Content-Length: {}\r\n\
@@ -48,7 +39,7 @@ pub async fn get_failed_login_with_body() -> Result<String, AppError> {
          {}",
         html.len(),
         html
-    ))
+    )
 }
 
 pub fn get_response(html: &str) -> String {
@@ -70,5 +61,14 @@ pub fn redirect_to_login<'a>() -> &'a str {
     "HTTP/1.1 302 Found\r\n\
          Location: /login\r\n\
          Content-Length: 0\r\n\
+         \r\n"
+}
+
+pub fn get_logout_response<'a>() -> &'a str {
+    "HTTP/1.1 303 See Other\r\n\
+         Set-Cookie: session=; Max-Age=0; Path=/; HttpOnly\r\n\
+         Location: /\r\n\
+         Content-Length: 0\r\n\
+         connection: Closed\r\n\
          \r\n"
 }

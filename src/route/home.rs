@@ -34,10 +34,3 @@ fn generate_context(articles_meta: &ArticleIndex, session: &Option<Session>) -> 
     context.insert("articles", &articles_meta.articles);
     context
 }
-
-fn generate_guest_context(articles_meta: &ArticleIndex) -> Context {
-    let mut context = tera::Context::new();
-    context.insert("articles", &articles_meta.articles);
-    context.insert("is_admin", &false);
-    context
-}

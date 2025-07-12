@@ -72,4 +72,10 @@ impl ArticleIndex {
         };
         Ok(())
     }
+
+    pub async fn delete_articles(&mut self, path: &Path, uuid: &str) -> Result<(), AppError> {
+        self.articles.retain(|meta| meta.uuid != uuid);
+        self.save_articles(path).await?;
+        Ok(())
+    }
 }

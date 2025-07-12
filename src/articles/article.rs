@@ -1,5 +1,6 @@
 use crate::error::{AppError, HttpError};
 use crate::utils::extract_from_string;
+use async_std::fs;
 use async_std::path::Path;
 use serde::{Deserialize, Serialize};
 use std::fs::File;
@@ -36,6 +37,14 @@ impl Article {
             .join(format!("{}.json", self.uuid));
         let writer = BufWriter::new(File::create(path)?);
         serde_json::to_writer_pretty(writer, &self)?;
+        Ok(())
+    }
+
+    pub async fn remove(&self) -> Result<(), AppError> {
+        let path = Path::new("Articles")
+            .join("articles")
+            .join(format!("{}.json", self.uuid));
+        fs::remove_file(path).await?;
         Ok(())
     }
 

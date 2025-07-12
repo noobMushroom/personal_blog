@@ -2,11 +2,12 @@ use crate::error::{AppError, HttpError};
 use crate::http::redirect_to_login;
 use crate::request::authed::AuthedRequest;
 use crate::request::{ArticleRoutes, HttpRequest, Methods, Routes};
+use crate::route::article_routes::remove::delete;
 use crate::route::article_routes::update_article::update_article;
 use crate::route::favicon::favicon;
 use crate::route::home::home;
-use crate::route::login::{login, login_with_body};
 use crate::route::not_found::page_not_found;
+use crate::route::user::logout::logout;
 use crate::session::AppState;
 use crate::users;
 use article_routes::article::article;
@@ -14,13 +15,14 @@ use article_routes::new::{add_article, get_article_html};
 use article_routes::update_article::get_update_form;
 use async_std::io::WriteExt;
 use async_std::net::TcpStream;
+use user::login::{login, login_with_body};
 
 mod article_routes;
 mod dashboard;
 mod favicon;
 mod home;
-mod login;
 mod not_found;
+mod user;
 
 pub async fn handle_route(
     http_req: &HttpRequest,
@@ -42,7 +44,7 @@ async fn handle_post(
     match &req.header.route {
         Routes::Login => {
             let session = users::authenticate(&req, state).await;
-            login_with_body(stream, session).await?;
+            login_with_body(stream, state, session).await?;
             Ok(())
         }
         Routes::Article(article) => match article {
@@ -63,12 +65,13 @@ async fn handle_get(
     match &req.header.route {
         Routes::Home => home(stream, state, req).await,
         Routes::Login => login(stream, state).await,
+        Routes::Logout => with_auth(req, state, stream, logout).await,
         Routes::Favicon => favicon(stream).await,
         Routes::Article(article_routes) => match article_routes {
             ArticleRoutes::New => with_auth(req, state, stream, get_article_html).await,
             ArticleRoutes::Update(_) => with_auth(req, state, stream, get_update_form).await,
             ArticleRoutes::Article(_) => article(req, state, stream).await,
-            _ => Err(HttpError::UnexpectedRoute("Routes error".into()))?,
+            ArticleRoutes::Delete(_) => with_auth(req, state, stream, delete).await,
         },
         Routes::Unknown(_) => page_not_found(req, state, stream).await,
         _ => Err(HttpError::UnexpectedRoute("Routes error".into()))?,

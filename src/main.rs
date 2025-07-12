@@ -2,8 +2,6 @@ use crate::request::run;
 
 mod articles;
 mod error;
-mod html;
-mod html_elements;
 mod http;
 mod request;
 mod route;

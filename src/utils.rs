@@ -1,3 +1,4 @@
+use async_std::path::{Path, PathBuf};
 use url_encor::Encoder;
 
 pub fn extract_from_string(body: &str, key: &str) -> Option<String> {
@@ -8,4 +9,8 @@ pub fn extract_from_string(body: &str, key: &str) -> Option<String> {
             _ => None,
         }
     })
+}
+///Returns the path of the index.json file for all the articles
+pub fn get_articles_index_path() -> PathBuf {
+    Path::new("Articles").join("index.json")
 }

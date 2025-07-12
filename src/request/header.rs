@@ -9,13 +9,11 @@ pub enum Methods {
 pub enum Routes {
     Home,
     Login,
+    Logout,
     Favicon,
     Dashboard,
     Authenticate,
-    New,
     Article(ArticleRoutes),
-    Delete(String),
-    Update(String),
     Unknown(String),
 }
 
@@ -38,6 +36,7 @@ fn parse_route(route: &str) -> Routes {
         "/favicon.ico" => Routes::Favicon,
         "/dashboard" => Routes::Dashboard,
         "/authenticate" => Routes::Authenticate,
+        "/logout" => Routes::Logout,
         article if article.starts_with("/article") => parse_article_subdomain(article),
         unknown => Routes::Unknown(unknown.to_string()),
     }
